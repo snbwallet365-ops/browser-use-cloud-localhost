@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: browser_use_backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY:-supersecretencryptionkey1234567890}
+      - HEADLESS=true
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - backend_data:/app/data
+      - backend_skills:/app/skills
+      - backend_profiles:/app/browser_profiles
+    ipc: host
+    shm_size: 2gb
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: browser_use_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NODE_ENV=production
+    depends_on:
+      - backend
+
+volumes:
+  backend_data:
+  backend_skills:
+  backend_profiles:
